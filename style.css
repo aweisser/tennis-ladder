@@ -1,0 +1,49 @@
+:root { 
+    --gap: .75rem; 
+    --card-pad: .6rem; 
+    --card-size: 150px; 
+    --bg: #f7f7f7; 
+    --light-green: #90EE90; 
+    --light-red: #FA8072;
+    --light-blue: #B0E0E6; 
+    --border: #ddd; 
+    --text: #222; 
+}
+* { box-sizing: border-box; }
+body { font-family: system-ui, Arial, sans-serif; margin: 0; background: #fff; color: var(--text); }
+header { padding: 1rem; border-bottom: 1px solid var(--border); }
+.wrap { max-width: 1000px; margin: 0 auto; padding: 1rem; }
+.controls { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+input, select, button { padding: .55rem .7rem; border: 1px solid var(--border); border-radius: .4rem; }
+button { cursor: pointer; }
+.pyramid { display: grid; gap: var(--gap); }
+.level { display: grid; gap: var(--gap); justify-content: center; }
+.level[data-size="1"] { grid-template-columns: repeat(1, var(--card-size)); }
+.level[data-size="2"] { grid-template-columns: repeat(2, var(--card-size)); }
+.level[data-size="3"] { grid-template-columns: repeat(3, var(--card-size)); }
+.level[data-size="4"] { grid-template-columns: repeat(4, var(--card-size)); }
+.level[data-size="5"] { grid-template-columns: repeat(5, var(--card-size)); }
+.level[data-size="6"] { grid-template-columns: repeat(6, var(--card-size)); }
+.level[data-size="7"] { grid-template-columns: repeat(7, var(--card-size)); }
+.level[data-size="8"] { grid-template-columns: repeat(8, var(--card-size)); }
+.level[data-size="9"] { grid-template-columns: repeat(9, var(--card-size)); }
+.level[data-size="10"] { grid-template-columns: repeat(10, var(--card-size)); }
+/*.level[data-size="7"] { grid-template-columns: repeat(7, minmax(120px,1fr)); }*/
+.player {
+  background: var(--bg); border:1px solid var(--border); border-radius:.5rem; padding: var(--card-pad);
+  display:flex; align-items:center; justify-content:space-between; gap:.5rem;
+  min-height: 52px;
+}
+.selected {
+    background: var(--light-blue);
+}
+.playable {
+    background: var(--light-green);
+}
+.slot { opacity:.6; font-style: italic; }
+.title { font-weight:600; margin:.5rem 0; }
+.muted { color:#666; font-size:.9rem; }
+.gridlabel { font-weight:600; }
+@media (max-width: 640px){
+  .level { grid-template-columns: 1fr !important; }
+}

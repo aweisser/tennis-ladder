@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="de">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tennis Ladder</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="wrap">
+  <h1 style="margin:0">Tennis Ladder</h1>
+  <div class="muted">Selektiere eine Spieler-Karte und siehe dir an, wer in der Pyramide gefordert werden kann.</div>
+</header>
+
+<main class="wrap">
+  <div class="controls">
+    <button id="addLevelBtn" title="Stufe einfügen">Stufe einfügen</button>
+    <button id="delLevelBtn" title="Stufe entfernen">Stufe entfernen</button>
+    <button id="resetAllBtn" title="Alles zurücksetzen">Alles zurücksetzen</button>
+    <button id="resetChlBtn" title="Challanges zurücksetzen">Challanges zurücksetzen</button>
+  </div>
+
+  <div id="pyramid" class="pyramid" aria-live="polite"></div>
+  <div id="ranking" class="ranking" aria-live="polite"></div>
+  <div id="challanges" class="challanges" aria-live="polite"></div>
+  
+</main>
+<script src="script.js"></script>
+</body>
+</html>

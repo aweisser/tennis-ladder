@@ -19,6 +19,19 @@ function getPyramidRowCol(rankingIdx) {
   return { row, col };
 }
 
+function movePlayer(fromIndex, toIndex) {
+  const [player] = state.ranking.splice(fromIndex, 1);
+  state.ranking.splice(toIndex, 0, player);
+}
+
+function applyChallangeResult(challange) {
+  const winnerIdx = state.ranking.indexOf(challange.winner);
+  const looserIdx = state.ranking.indexOf(challange.looser);
+  if (winnerIdx > looserIdx) {
+    movePlayer(winnerIdx, looserIdx);
+  }
+}
+
 function loadState(){
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || DEFAULT_STATE; }
   catch { return DEFAULT_STATE; }
@@ -144,7 +157,15 @@ function renderChallanges() {
     elChlEditBtn.onclick = function (event) {
       const val = prompt('Wer hat gewonnen?');
       if (val) {
-        challange.winner = val;
+        if (val == challange.challanger) {
+          challange.winner = challange.challanger;
+          challange.looser = challange.challangee;
+        }
+        if (val == challange.challangee) {
+          challange.winner = challange.challangee;
+          challange.looser = challange.challanger;
+        }
+        applyChallangeResult(challange);
         saveState(state);
         renderAll();
       }
@@ -223,6 +244,7 @@ function newPlayerCard(name, rankIdx) {
         challangee: playBtn.dataset.player,
         requestDate: new Date(),
         winner: null,
+        looser: null,
       };
       if (confirm(`Die Forderung von Spieler "${challange.challanger}" gegen Spieler "${challange.challangee}" eintragen?`)) {
         state.challanges.push(challange);

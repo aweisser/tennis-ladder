@@ -63,6 +63,38 @@ function renderRanking() {
     
     const actions = document.createElement('div');
     actions.className = 'actions';
+
+    const up = document.createElement('button');
+    up.textContent = '↑';
+    up.title = "Spieler einen Platz nach vorne schieben";
+    up.onclick = function (event) {
+      state.ranking[rankIdx] = state.ranking[rankIdx-1];
+      state.ranking[rankIdx-1] = name;
+      saveState(state);
+      renderAll();
+      event.stopPropagation();
+    };
+    actions.appendChild(up);
+  
+    const down = document.createElement('button');
+    down.textContent = '↓';
+    down.title = "Spieler einen Platz nach hinten schieben";
+    down.onclick = function (event) {
+      state.ranking[rankIdx] = state.ranking[rankIdx+1];
+      state.ranking[rankIdx+1] = name;
+      saveState(state);
+      renderAll();
+      event.stopPropagation();
+    };
+    actions.appendChild(down);
+
+    if (rankIdx == 0) {
+      up.disabled = true;
+    }
+    if (rankIdx == state.ranking.length-1) {
+      down.disabled = true;
+    }
+
     if (name) {
       const rm = document.createElement('button');
       rm.textContent = '-';
@@ -93,7 +125,6 @@ function renderRanking() {
       actions.appendChild(add);
     }
     card.appendChild(actions);
-
     elRanking.appendChild(card);
   });
 }

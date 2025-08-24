@@ -33,7 +33,7 @@ button { cursor: pointer; }
   background: var(--bg); border:1px solid var(--border); border-radius:.5rem; 
   padding: var(--card-pad); margin: 0px;
   display:flex; align-items:center; justify-content:space-between; gap:.5rem;
-  min-height: 45px;
+  min-height: 50px; max-height: 50px;
 }
 .selected {
     background: var(--light-blue);

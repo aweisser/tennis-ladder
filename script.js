@@ -10,8 +10,14 @@ const elRanking = document.getElementById('ranking');
 const elChallanges = document.getElementById('challanges');
 
 
-function getRankingIdx(row, col) {
-  return (row * (row + 1)) / 2 + col;
+function getRankingIdx(rowIdx, colIdx) {
+  return (rowIdx * (rowIdx + 1)) / 2 + colIdx;
+}
+
+function getPyramidRowCol(rankingIdx) {
+  const row = Math.floor((Math.sqrt(1 + 8 * rankingIdx) - 1) / 2);
+  const col = rankingIdx - (row * (row + 1)) / 2;
+  return { row, col };
 }
 
 function loadState(){
@@ -106,20 +112,6 @@ function renderPyramid() {
           event.stopPropagation();
         };
         actions.appendChild(playBtn);
-
-        const rm = document.createElement('button');
-        rm.textContent = '-';
-        rm.title = 'Spielernamen entfernen';
-        rm.onclick = function (event) {
-          if (confirm(`Spieler "${name}" wirklich löschen?`)) {
-            state.levels[rowIdx][colIdx] = null;
-            state.ranking[rankIdx] = null;
-            saveState(state);
-            renderAll();
-          }
-          event.stopPropagation();
-        };
-        actions.appendChild(rm);
       } else {
         const add = document.createElement('button');
         add.textContent = '+';
@@ -146,12 +138,50 @@ function renderPyramid() {
 function renderRanking() {
   elRanking.innerHTML = '';
   state.ranking.forEach((name, rankIdx) => {
+    const pyramidRowCol = getPyramidRowCol(rankIdx);
+
     const card = document.createElement('div');
     card.className = 'player'
     //card.innerHTML = `${rankIdx + 1}. ${name}`;
     const label = document.createElement('span');
     label.innerHTML = name ? `<span class="gridlabel">${rankIdx + 1}. ${name}</span>` : `<span class="slot">${rankIdx + 1}. [frei]</span>`;
     card.appendChild(label);
+    
+    const actions = document.createElement('div');
+    actions.className = 'actions';
+    if (name) {
+      const rm = document.createElement('button');
+      rm.textContent = '-';
+      rm.title = 'Spielernamen entfernen';
+      rm.onclick = function (event) {
+        if (confirm(`Spieler "${name}" wirklich löschen?`)) {
+          state.levels[pyramidRowCol.row][pyramidRowCol.col] = null;
+          state.ranking[rankIdx] = null;
+          saveState(state);
+          renderAll();
+        }
+        event.stopPropagation();
+      };
+      actions.appendChild(rm);
+    } else {
+      const add = document.createElement('button');
+      add.textContent = '+';
+      add.title = "Spielernamen eintragen";
+      add.onclick = function (event) {
+        const val = prompt('Name für diesen Spieler:');
+        if (val) {
+          const pname = val.trim();
+          state.levels[pyramidRowCol.row][pyramidRowCol.col] = pname;
+          state.ranking[rankIdx] = pname;
+          saveState(state);
+          renderAll();
+        }
+        event.stopPropagation();
+      };
+      actions.appendChild(add);
+    }
+    card.appendChild(actions);
+
     elRanking.appendChild(card);
   });
 }

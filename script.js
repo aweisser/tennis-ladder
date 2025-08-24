@@ -85,19 +85,6 @@ function renderPyramid() {
       const actions = document.createElement('div');
       actions.className = 'actions';
       if (name) {
-        /*const upBtn = document.createElement('button');
-        upBtn.textContent = '↑';
-        upBtn.title = 'Platz mit direktem Vordermann tauschen (vereinfachte Regel)';
-        upBtn.onclick = () => {
-          if(colIdx > 0){
-            [state.levels[rowIdx][colIdx-1], state.levels[rowIdx][colIdx]] = [state.levels[rowIdx][colIdx], state.levels[rowIdx][colIdx-1]];
-          } else if (rowIdx > 0 && levels[rowIdx-1][levels[rowIdx-1].length-1] !== null) {
-            [state.levels[rowIdx-1][state.levels[rowIdx-1].length-1], state.levels[rowIdx][colIdx]] = [state.levels[rowIdx][colIdx], state.levels[rowIdx-1][levels[rowIdx-1].length-1]];
-          }
-          saveState(state); render();
-        };
-        actions.appendChild(upBtn);
-        */
         const playBtn = document.createElement('button');
         playBtn.textContent = 'F';
         playBtn.title = 'Diesen Spieler fordern!';

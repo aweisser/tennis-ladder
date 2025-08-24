@@ -98,10 +98,11 @@ function renderRanking() {
     if (name) {
       const rm = document.createElement('button');
       rm.textContent = '-';
-      rm.title = 'Spielernamen entfernen';
+      rm.title = 'Spieler entfernen';
       rm.onclick = function (event) {
         if (confirm(`Spieler "${name}" wirklich löschen?`)) {
-          state.ranking[rankIdx] = null;
+          state.ranking.splice(rankIdx,1);
+          state.ranking.push(null);
           saveState(state);
           renderAll();
         }

@@ -229,9 +229,7 @@ document.getElementById('delLevelBtn').onclick = () => {
   if (state.levels.length > 0) {
     const rowIdx = state.levels.length-1;
     const level = state.levels[rowIdx];
-    level.forEach((_, colIdx) => {
-      //const rankIdx = getRankingIdx(rowIdx, colIdx);
-      //state.ranking[rankIdx] = null;
+    level.forEach(() => {
       state.ranking.pop();
     });
   }

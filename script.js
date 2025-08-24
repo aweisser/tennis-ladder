@@ -1,5 +1,4 @@
 const DEFAULT_STATE = {
-    levels: [[null],[null,null],[null,null,null],[null,null,null,null]],
     ranking: [],
     challanges: [],
 };
@@ -37,101 +36,17 @@ function renderAll(){
 
 function renderPyramid() {
   elPyramid.innerHTML = '';
-  state.levels.forEach((row, rowIdx) => {
-    const level = document.createElement('section');
-    level.className = 'level';
-    level.dataset.size = row.length;
-    level.setAttribute('aria-label', `Level ${rowIdx + 1}`);
-    elPyramid.appendChild(level);
-
-    row.forEach((name, colIdx) => {
-      const rankIdx = getRankingIdx(rowIdx, colIdx);
-
-      const card = document.createElement('div');
-      card.className = 'player';
-      card.dataset.level = rowIdx;
-      card.dataset.rank = colIdx;
-      card.dataset.name = name;
-      const label = document.createElement('span');
-      label.innerHTML = name ? `<span class="gridlabel">${rankIdx+1}. ${name}</span>` : `<span class="slot">${rankIdx+1}. [frei]</span>`;
-      card.onclick = () => {
-        document.querySelectorAll(".playable").forEach(el => {
-          el.classList.remove("playable");
-        });
-        document.querySelectorAll("button.challange").forEach(btn => {
-          btn.hidden = true;
-        });
-        if (card.classList.contains("selected")) {
-          card.classList.remove("selected");
-        } else {
-          document.querySelectorAll(".selected").forEach(el => {
-            el.classList.remove("selected");
-          });
-          card.classList.add("selected");
-          document.querySelectorAll(".player").forEach(el => {
-            // same row left from the selected player is playable
-            if (el.dataset.level == rowIdx && el.dataset.rank < colIdx) {
-              el.classList.add("playable");
-            }
-            // everyone right above selected player is playable too
-            if (el.dataset.level == rowIdx - 1 && el.dataset.rank >= colIdx) {
-              el.classList.add("playable");
-            }
-          });
-          state.player = card.dataset.name;
-        }
-        document.querySelectorAll(".playable").forEach(el => {
-          el.querySelectorAll("button.challange").forEach(btn => {
-            btn.hidden = false;
-          });
-        });
-      };
-      card.appendChild(label);
-
-      const actions = document.createElement('div');
-      actions.className = 'actions';
-      if (name) {
-        const playBtn = document.createElement('button');
-        playBtn.textContent = 'F';
-        playBtn.title = 'Diesen Spieler fordern!';
-        playBtn.className = 'challange';
-        playBtn.dataset.player = name;
-        playBtn.hidden = true;
-        playBtn.onclick = function (event) {
-          const challange = {
-            challanger: state.player,
-            challangee: playBtn.dataset.player,
-            requestDate: new Date(),
-            winner: null,
-          };
-          if (confirm(`Die Forderung von Spieler "${challange.challanger}" gegen Spieler "${challange.challangee}" eintragen?`)) {
-            state.challanges.push(challange);
-            saveState(state);
-            renderAll();
-          }
-          event.stopPropagation();
-        };
-        actions.appendChild(playBtn);
-      } else {
-        const add = document.createElement('button');
-        add.textContent = '+';
-        add.title = "Spielernamen eintragen";
-        add.onclick = function (event) {
-          const val = prompt('Name für diesen Spieler:');
-          if (val) {
-            const pname = val.trim();
-            state.levels[rowIdx][colIdx] = pname;
-            state.ranking[rankIdx] = pname;
-            saveState(state);
-            renderAll();
-          }
-          event.stopPropagation();
-        };
-        actions.appendChild(add);
-      }
-      card.appendChild(actions);
-      level.appendChild(card);
-    });
+  let latestRowIdx = -1;
+  let level = null;
+  state.ranking.forEach((name, rankIdx) => {
+    const rowIdx = getPyramidRowCol(rankIdx).row;
+    if (rowIdx != latestRowIdx) {
+      latestRowIdx = rowIdx;
+      level = newPyramidLevel(size=rowIdx+1);
+      elPyramid.appendChild(level);
+    }
+    const card = newPlayerCard(name, rankIdx);
+    level.appendChild(card);
   });
 }
 
@@ -142,7 +57,6 @@ function renderRanking() {
 
     const card = document.createElement('div');
     card.className = 'player'
-    //card.innerHTML = `${rankIdx + 1}. ${name}`;
     const label = document.createElement('span');
     label.innerHTML = name ? `<span class="gridlabel">${rankIdx + 1}. ${name}</span>` : `<span class="slot">${rankIdx + 1}. [frei]</span>`;
     card.appendChild(label);
@@ -155,7 +69,6 @@ function renderRanking() {
       rm.title = 'Spielernamen entfernen';
       rm.onclick = function (event) {
         if (confirm(`Spieler "${name}" wirklich löschen?`)) {
-          state.levels[pyramidRowCol.row][pyramidRowCol.col] = null;
           state.ranking[rankIdx] = null;
           saveState(state);
           renderAll();
@@ -171,7 +84,6 @@ function renderRanking() {
         const val = prompt('Name für diesen Spieler:');
         if (val) {
           const pname = val.trim();
-          state.levels[pyramidRowCol.row][pyramidRowCol.col] = pname;
           state.ranking[rankIdx] = pname;
           saveState(state);
           renderAll();
@@ -212,35 +124,132 @@ function renderChallanges() {
   });
 }
 
+function newPyramidLevel(size) {
+  const level = document.createElement('section');
+  level.className = 'level';
+  level.dataset.size = size;
+  level.setAttribute('aria-label', `Level ${size}`);
+  return level;
+}
+
+function newPlayerCard(name, rankIdx) {
+  const rowIdx = getPyramidRowCol(rankIdx).row;
+  const colIdx = getPyramidRowCol(rankIdx).col;
+  const card = document.createElement('div');
+  card.className = 'player';
+  card.dataset.level = rowIdx;
+  card.dataset.rank = colIdx;
+  card.dataset.name = name;
+  const label = document.createElement('span');
+  label.innerHTML = name ? `<span class="gridlabel">${rankIdx+1}. ${name}</span>` : `<span class="slot">${rankIdx+1}. [frei]</span>`;
+  card.onclick = () => {
+    document.querySelectorAll(".playable").forEach(el => {
+      el.classList.remove("playable");
+    });
+    document.querySelectorAll("button.challange").forEach(btn => {
+      btn.hidden = true;
+    });
+    if (card.classList.contains("selected")) {
+      card.classList.remove("selected");
+    } else {
+      document.querySelectorAll(".selected").forEach(el => {
+        el.classList.remove("selected");
+      });
+      card.classList.add("selected");
+      document.querySelectorAll(".player").forEach(el => {
+        // same row left from the selected player is playable
+        if (el.dataset.level == rowIdx && el.dataset.rank < colIdx) {
+          el.classList.add("playable");
+        }
+        // everyone right above selected player is playable too
+        if (el.dataset.level == rowIdx - 1 && el.dataset.rank >= colIdx) {
+          el.classList.add("playable");
+        }
+      });
+      state.player = card.dataset.name;
+    }
+    document.querySelectorAll(".playable").forEach(el => {
+      el.querySelectorAll("button.challange").forEach(btn => {
+        btn.hidden = false;
+      });
+    });
+  };
+  card.appendChild(label);
+
+  const actions = document.createElement('div');
+  actions.className = 'actions';
+  if (name) {
+    const playBtn = document.createElement('button');
+    playBtn.textContent = 'F';
+    playBtn.title = 'Diesen Spieler fordern!';
+    playBtn.className = 'challange';
+    playBtn.dataset.player = name;
+    playBtn.hidden = true;
+    playBtn.onclick = function (event) {
+      const challange = {
+        challanger: state.player,
+        challangee: playBtn.dataset.player,
+        requestDate: new Date(),
+        winner: null,
+      };
+      if (confirm(`Die Forderung von Spieler "${challange.challanger}" gegen Spieler "${challange.challangee}" eintragen?`)) {
+        state.challanges.push(challange);
+        saveState(state);
+        renderAll();
+      }
+      event.stopPropagation();
+    };
+    actions.appendChild(playBtn);
+  } else {
+    const add = document.createElement('button');
+    add.textContent = '+';
+    add.title = "Spielernamen eintragen";
+    add.onclick = function (event) {
+      const val = prompt('Name für diesen Spieler:');
+      if (val) {
+        const pname = val.trim();
+        state.ranking[rankIdx] = pname;
+        saveState(state);
+        renderAll();
+      }
+      event.stopPropagation();
+    };
+    actions.appendChild(add);
+  }
+  card.appendChild(actions);
+  return card;
+}
 
 /* MAIN Loop */
 let state = loadState()
 
 /* Register onClick Events on Buttons */
 document.getElementById('addLevelBtn').onclick = () => {
-    const newLevel = new Array(state.levels.length+1).fill(null);
-    state.levels.push(newLevel);
-    newLevel.forEach(() => state.ranking.push(null));
+    const lowestRankIdx = state.ranking.length-1;
+    const lowestLevelIdx = getPyramidRowCol(lowestRankIdx).row;
+    const newLevelIdx = isNaN(lowestLevelIdx) ? 0 : lowestLevelIdx+1;
+    const newLevelLenght = newLevelIdx+1;
+    for (let i = 0; i < newLevelLenght; i++) {
+      state.ranking.push(null)
+    }
     saveState(state); 
     renderAll();
 }
 
 document.getElementById('delLevelBtn').onclick = () => {
-  if (state.levels.length > 0) {
-    const rowIdx = state.levels.length-1;
-    const level = state.levels[rowIdx];
-    level.forEach(() => {
+  const lowestRankIdx = state.ranking.length-1;
+  const lowestLevelIdx = getPyramidRowCol(lowestRankIdx).row;
+  const lowestLevelLength = lowestLevelIdx+1;
+  for (let i = 0; i < lowestLevelLength; i++) {
       state.ranking.pop();
-    });
   }
-  state.levels.pop();
   saveState(state); 
   renderAll();
 }
 
-document.getElementById('resetAllBtn').onclick = () => {
-    if(confirm('Wirklich alles löschen?')) {
-        state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+document.getElementById('resetRankingBtn').onclick = () => {
+    if(confirm('Ranking wirklich löschen?')) {
+        state.ranking = [];
         saveState(state); 
         renderAll();
     }

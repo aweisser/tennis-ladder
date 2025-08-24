@@ -1,7 +1,7 @@
 :root { 
     --gap: .75rem; 
     --card-pad: .6rem; 
-    --card-size: 150px; 
+    --card-size: 160px; 
     --bg: #f7f7f7; 
     --light-green: #90EE90; 
     --light-red: #FA8072;
@@ -30,9 +30,10 @@ button { cursor: pointer; }
 .level[data-size="10"] { grid-template-columns: repeat(10, var(--card-size)); }
 /*.level[data-size="7"] { grid-template-columns: repeat(7, minmax(120px,1fr)); }*/
 .player {
-  background: var(--bg); border:1px solid var(--border); border-radius:.5rem; padding: var(--card-pad);
+  background: var(--bg); border:1px solid var(--border); border-radius:.5rem; 
+  padding: var(--card-pad); margin: 0px;
   display:flex; align-items:center; justify-content:space-between; gap:.5rem;
-  min-height: 52px;
+  min-height: 45px;
 }
 .selected {
     background: var(--light-blue);

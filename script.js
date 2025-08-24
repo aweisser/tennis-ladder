@@ -39,13 +39,15 @@ function renderPyramid() {
     elPyramid.appendChild(level);
 
     row.forEach((name, colIdx) => {
+      const rankIdx = getRankingIdx(rowIdx, colIdx);
+
       const card = document.createElement('div');
       card.className = 'player';
       card.dataset.level = rowIdx;
       card.dataset.rank = colIdx;
       card.dataset.name = name;
       const label = document.createElement('span');
-      label.innerHTML = name ? `<span class="gridlabel">${name}</span>` : `<span class="slot">[frei]</span>`;
+      label.innerHTML = name ? `<span class="gridlabel">${rankIdx+1}. ${name}</span>` : `<span class="slot">${rankIdx+1}. [frei]</span>`;
       card.onclick = () => {
         document.querySelectorAll(".playable").forEach(el => {
           el.classList.remove("playable");
@@ -124,6 +126,7 @@ function renderPyramid() {
         rm.onclick = function (event) {
           if (confirm(`Spieler "${name}" wirklich löschen?`)) {
             state.levels[rowIdx][colIdx] = null;
+            state.ranking[rankIdx] = null;
             saveState(state);
             renderAll();
           }
@@ -139,7 +142,7 @@ function renderPyramid() {
           if (val) {
             const pname = val.trim();
             state.levels[rowIdx][colIdx] = pname;
-            state.ranking[getRankingIdx(rowIdx, colIdx)] = pname;
+            state.ranking[rankIdx] = pname;
             saveState(state);
             renderAll();
           }
@@ -156,9 +159,13 @@ function renderPyramid() {
 function renderRanking() {
   elRanking.innerHTML = '';
   state.ranking.forEach((name, rankIdx) => {
-    const elRank = document.createElement('pre');
-    elRank.innerHTML = `${rankIdx + 1}. ${name}`;
-    elRanking.appendChild(elRank);
+    const card = document.createElement('div');
+    card.className = 'player'
+    //card.innerHTML = `${rankIdx + 1}. ${name}`;
+    const label = document.createElement('span');
+    label.innerHTML = name ? `<span class="gridlabel">${rankIdx + 1}. ${name}</span>` : `<span class="slot">${rankIdx + 1}. [frei]</span>`;
+    card.appendChild(label);
+    elRanking.appendChild(card);
   });
 }
 
@@ -196,14 +203,24 @@ let state = loadState()
 document.getElementById('addLevelBtn').onclick = () => {
     const newLevel = new Array(state.levels.length+1).fill(null);
     state.levels.push(newLevel);
+    newLevel.forEach(() => state.ranking.push(null));
     saveState(state); 
     renderAll();
 }
 
 document.getElementById('delLevelBtn').onclick = () => {
-    state.levels.pop();
-    saveState(state); 
-    renderAll();
+  if (state.levels.length > 0) {
+    const rowIdx = state.levels.length-1;
+    const level = state.levels[rowIdx];
+    level.forEach((_, colIdx) => {
+      //const rankIdx = getRankingIdx(rowIdx, colIdx);
+      //state.ranking[rankIdx] = null;
+      state.ranking.pop();
+    });
+  }
+  state.levels.pop();
+  saveState(state); 
+  renderAll();
 }
 
 document.getElementById('resetAllBtn').onclick = () => {

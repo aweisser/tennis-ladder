@@ -48,3 +48,53 @@ button { cursor: pointer; }
 @media (max-width: 640px){
   .level { grid-template-columns: 1fr !important; }
 }
+
+/* Challenges */
+.challenges-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 0.6rem;
+}
+
+.challenges-table thead th {
+  position: sticky; top: 0;
+  background: #f0f0f0; z-index: 1;
+  text-align: left; padding: .6rem .9rem;
+}
+
+.challenges-table tbody tr {
+  background: #f7f7f7;
+  box-shadow: 0 1px 3px rgba(0,0,0,.08);
+}
+
+.challenges-table td {
+  padding: .6rem .9rem;
+  border-top: 1px solid #eee;
+}
+
+/* runde Ecken links/rechts */
+.challenges-table tbody td:first-child {
+  border-top-left-radius: .6rem; border-bottom-left-radius: .6rem;
+}
+.challenges-table tbody td:last-child {
+  border-top-right-radius: .6rem; border-bottom-right-radius: .6rem;
+}
+
+/* Badges */
+.badge { display:inline-block; padding:.15rem .45rem; border-radius:.4rem; font-size:.85rem; }
+.badge.open   { background:#FFFACD; border:1px solid #EEE08A; }
+.badge.done   { background:#e6f7e6; border:1px solid #cce5cc; }
+.badge.cancel { background:#ffe6e6; border:1px solid #f3bcbc; }
+
+/* Mobile: Tabelle als Cards darstellen */
+@media (max-width: 640px){
+  .challenges-table thead { display:none; }
+  .challenges-table, .challenges-table tbody, .challenges-table tr, .challenges-table td { display:block; width:100%; }
+  .challenges-table tbody tr { border-radius:.6rem; }
+  .challenges-table td { border:none; border-top:1px solid #eee; }
+  .challenges-table td::before {
+    content: attr(data-label);
+    font-weight:600; opacity:.7; margin-right:.5rem;
+    display:inline-block; min-width:7.5rem;
+  }
+}

@@ -17,7 +17,7 @@
     <button id="addLevelBtn" title="Stufe einfügen">Stufe einfügen</button>
     <button id="delLevelBtn" title="Stufe entfernen">Stufe entfernen</button>
     <button id="resetRankingBtn" title="Ranking zurücksetzen">Ranking zurücksetzen</button>
-    <button id="resetChlBtn" title="Challanges zurücksetzen">Challanges zurücksetzen</button>
+    <button id="resetChlBtn" title="Challenges zurücksetzen">Challenges zurücksetzen</button>
   </div>
 
   <div id="pyramid" class="pyramid" aria-live="polite"></div>
@@ -25,8 +25,19 @@
   <h2>Ranking</h2>
   <div id="ranking" class="ranking" aria-live="polite"></div>
   
-  <h2>Challanges</h2>
-  <div id="challanges" class="challanges" aria-live="polite"></div>
+  <h2>Challenges</h2>
+  <table class="challenges-table">
+    <thead>
+      <tr>
+        <th>Herausforderer</th>
+        <th>Gefordert</th>
+        <th>Datum</th>
+        <th>Status</th>
+        <th>Gewinner</th>
+      </tr>
+    </thead>
+    <tbody id="challenges-body"></tbody>
+  </table>
   
 </main>
 <script src="script.js"></script>

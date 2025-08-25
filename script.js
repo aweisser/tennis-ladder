@@ -1,12 +1,12 @@
 const DEFAULT_STATE = {
     ranking: [],
-    challanges: [],
+    challenges: [],
 };
 const STORAGE_KEY = "tennis-ladder-v1";
 
 const elPyramid = document.getElementById('pyramid');
 const elRanking = document.getElementById('ranking');
-const elChallanges = document.getElementById('challanges');
+const elChallenges = document.getElementById('challenges');
 
 
 function getRankingIdx(rowIdx, colIdx) {
@@ -24,9 +24,9 @@ function movePlayer(fromIndex, toIndex) {
   state.ranking.splice(toIndex, 0, player);
 }
 
-function applyChallangeResult(challange) {
-  const winnerIdx = state.ranking.indexOf(challange.winner);
-  const looserIdx = state.ranking.indexOf(challange.looser);
+function applyChallengeResult(challenge) {
+  const winnerIdx = state.ranking.indexOf(challenge.winner);
+  const looserIdx = state.ranking.indexOf(challenge.looser);
   if (winnerIdx > looserIdx) {
     movePlayer(winnerIdx, looserIdx);
   }
@@ -44,7 +44,7 @@ function saveState(state){
 function renderAll(){
   renderPyramid();
   renderRanking();
-  renderChallanges();
+  renderChallengesTable();
 }
 
 function renderPyramid() {
@@ -143,39 +143,57 @@ function renderRanking() {
   });
 }
 
-function renderChallanges() {
-  elChallanges.innerHTML = '';
-  state.challanges.forEach((challange, _) => {
-    const elChl = document.createElement('div');
+function renderChallengesTable() {
+  const tbody = document.getElementById('challenges-body');
+  tbody.innerHTML = '';
+  for (let i = state.challenges.length - 1; i >= 0; i--) {
+    const challenge = state.challenges[i];
+    const tr = document.createElement('tr');
 
-    const elChlDetails = document.createElement('pre');
-    elChlDetails.innerText = JSON.stringify(challange);
-    elChl.appendChild(elChlDetails);
+    const status = challenge.status ?? (challenge.winner ? 'done' : 'open');
+    const date = new Date(challenge.requestDate);
+    const dateText = date.toLocaleString('de-DE', {
+      year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit'
+    });
 
-    const elChlEditBtn = document.createElement('button');
-    elChlEditBtn.textContent = 'Ergebnis';
-    elChlEditBtn.onclick = function (event) {
-      const val = prompt('Wer hat gewonnen?');
-      if (val) {
-        if (val == challange.challanger) {
-          challange.winner = challange.challanger;
-          challange.looser = challange.challangee;
+    tr.innerHTML = `
+      <td data-label="Challenger">${challenge.challenger}</td>
+      <td data-label="Challengee">${challenge.challengee}</td>
+      <td data-label="Datum"><time datetime="${date.toISOString()}">${dateText}</time></td>
+      <td data-label="Status"><span class="badge ${status}">${status}</span></td>
+    `;
+    
+    const tdWinner = document.createElement("td");
+    if (challenge.winner) {
+      tdWinner.innerHTML = `<td data-label="Winner">${challenge.winner}</td>`
+    } else {
+      const resultBtn = document.createElement('button');
+      resultBtn.textContent = 'Ergebnis';
+      resultBtn.onclick = function (event) {
+        const val = prompt('Wer hat gewonnen?');
+        if (val) {
+          if (val == challenge.challenger) {
+            challenge.winner = challenge.challenger;
+            challenge.looser = challenge.challengee;
+          }
+          if (val == challenge.challengee) {
+            challenge.winner = challenge.challengee;
+            challenge.looser = challenge.challenger;
+          }
+          applyChallengeResult(challenge);
+          saveState(state);
+          renderAll();
         }
-        if (val == challange.challangee) {
-          challange.winner = challange.challangee;
-          challange.looser = challange.challanger;
-        }
-        applyChallangeResult(challange);
-        saveState(state);
-        renderAll();
-      }
-      event.stopPropagation();
-    };
-    elChl.appendChild(elChlEditBtn);
-
-    elChallanges.appendChild(elChl);
-  });
+        event.stopPropagation();
+      };
+      tdWinner.appendChild(resultBtn);
+    }
+    tr.appendChild(tdWinner);
+    tbody.appendChild(tr);
+  }
 }
+
 
 function newPyramidLevel(size) {
   const level = document.createElement('section');
@@ -199,7 +217,7 @@ function newPlayerCard(name, rankIdx) {
     document.querySelectorAll(".playable").forEach(el => {
       el.classList.remove("playable");
     });
-    document.querySelectorAll("button.challange").forEach(btn => {
+    document.querySelectorAll("button.challenge").forEach(btn => {
       btn.hidden = true;
     });
     if (card.classList.contains("selected")) {
@@ -222,7 +240,7 @@ function newPlayerCard(name, rankIdx) {
       state.player = card.dataset.name;
     }
     document.querySelectorAll(".playable").forEach(el => {
-      el.querySelectorAll("button.challange").forEach(btn => {
+      el.querySelectorAll("button.challenge").forEach(btn => {
         btn.hidden = false;
       });
     });
@@ -235,19 +253,19 @@ function newPlayerCard(name, rankIdx) {
     const playBtn = document.createElement('button');
     playBtn.textContent = 'F';
     playBtn.title = 'Diesen Spieler fordern!';
-    playBtn.className = 'challange';
+    playBtn.className = 'challenge';
     playBtn.dataset.player = name;
     playBtn.hidden = true;
     playBtn.onclick = function (event) {
-      const challange = {
-        challanger: state.player,
-        challangee: playBtn.dataset.player,
+      const challenge = {
+        challenger: state.player,
+        challengee: playBtn.dataset.player,
         requestDate: new Date(),
         winner: null,
         looser: null,
       };
-      if (confirm(`Die Forderung von Spieler "${challange.challanger}" gegen Spieler "${challange.challangee}" eintragen?`)) {
-        state.challanges.push(challange);
+      if (confirm(`Die Forderung von Spieler "${challenge.challenger}" gegen Spieler "${challenge.challengee}" eintragen?`)) {
+        state.challenges.push(challenge);
         saveState(state);
         renderAll();
       }
@@ -310,8 +328,8 @@ document.getElementById('resetRankingBtn').onclick = () => {
 };
 
 document.getElementById('resetChlBtn').onclick = () => {
-    if(confirm('Alle Challanges löschen?')) {
-        state.challanges = [];
+    if(confirm('Alle Challenges löschen?')) {
+        state.challenges = [];
         saveState(state);
         renderAll();
     }

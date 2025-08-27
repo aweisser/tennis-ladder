@@ -38,8 +38,64 @@
     </thead>
     <tbody id="challenges-body"></tbody>
   </table>
+
+  <!-- Match Result Dialog (modal) -->
+  <div id="matchModal" class="match-modal" hidden aria-hidden="true">
+    <div class="match-dialog" role="dialog" aria-modal="true" aria-labelledby="matchDlgTitle">
+      <header class="match-dlg-head">
+        <h3 id="matchDlgTitle">Match eintragen</h3>
+        <button class="match-icon-btn" id="matchDlgClose" aria-label="Schließen">✕</button>
+      </header>
+
+      <div class="match-dlg-body">
+        <div class="match-players">
+          <div class="match-p">
+            <div class="match-lbl">Spieler A</div>
+            <div class="match-val" id="matchNameA">–</div>
+          </div>
+          <div class="match-p">
+            <div class="match-lbl">Spieler B</div>
+            <div class="match-val" id="matchNameB">–</div>
+          </div>
+        </div>
+
+        <fieldset class="match-set">
+          <legend>Satz 1</legend>
+          <label><span id="matchNA1">A</span> <input type="number" min="0" inputmode="numeric" id="matchS1A"></label>
+          <span class="match-sep">:</span>
+          <label><span id="matchNB1">B</span> <input type="number" min="0" inputmode="numeric" id="matchS1B"></label>
+          <div class="match-msg" id="matchS1Msg"></div>
+        </fieldset>
+
+        <fieldset class="match-set">
+          <legend>Satz 2</legend>
+          <label><span id="matchNA2">A</span> <input type="number" min="0" inputmode="numeric" id="matchS2A"></label>
+          <span class="match-sep">:</span>
+          <label><span id="matchNB2">B</span> <input type="number" min="0" inputmode="numeric" id="matchS2B"></label>
+          <div class="match-msg" id="matchS2Msg"></div>
+        </fieldset>
+
+        <fieldset class="match-set" id="matchTBWrap" hidden>
+          <legend>Match-Tiebreak (10, win-by-2)</legend>
+          <label><span id="matchNA3">A</span> <input type="number" min="0" inputmode="numeric" id="matchTBA"></label>
+          <span class="match-sep">:</span>
+          <label><span id="matchNB3">B</span> <input type="number" min="0" inputmode="numeric" id="matchTBB"></label>
+          <div class="match-msg" id="matchTBMsg"></div>
+        </fieldset>
+
+        <div class="match-summary" id="matchSummary">Bitte Ergebnisse eintragen…</div>
+      </div>
+
+      <footer class="match-dlg-foot">
+        <button class="match-btn match-ghost" id="matchDlgCancel">Abbrechen</button>
+        <button class="match-btn match-primary" id="matchDlgSave" disabled>Speichern</button>
+      </footer>
+    </div>
+  </div>
+
   
 </main>
+<script src="match-dialog.js"></script>
 <script src="script.js"></script>
 </body>
 </html>

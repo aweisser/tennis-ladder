@@ -44,7 +44,7 @@ function saveState(state){
 function renderAll(){
   renderPyramid();
   renderRanking();
-  renderChallengesTable();
+  renderChallenges();
 }
 
 function renderPyramid() {
@@ -143,7 +143,7 @@ function renderRanking() {
   });
 }
 
-function renderChallengesTable() {
+function renderChallenges() {
   const tbody = document.getElementById('challenges-body');
   tbody.innerHTML = '';
   for (let i = state.challenges.length - 1; i >= 0; i--) {
@@ -171,21 +171,20 @@ function renderChallengesTable() {
       const resultBtn = document.createElement('button');
       resultBtn.textContent = 'Ergebnis';
       resultBtn.onclick = function (event) {
-        const val = prompt('Wer hat gewonnen?');
-        if (val) {
-          if (val == challenge.challenger) {
-            challenge.winner = challenge.challenger;
-            challenge.looser = challenge.challengee;
-          }
-          if (val == challenge.challengee) {
-            challenge.winner = challenge.challengee;
-            challenge.looser = challenge.challenger;
-          }
-          applyChallengeResult(challenge);
-          saveState(state);
-          renderAll();
-        }
-        event.stopPropagation();
+          openMatchDialog({
+            playerA: challenge.challenger,
+            playerB: challenge.challengee,
+            onSubmit: (result) => {
+              // result = { playerA:'Jannik', playerB:'Carlos', sets:[{a:6,b:4},{a:6,b:7}], tiebreak:{a:10,b:8}|null, winner, looser, createdAt }
+              challenge.winner = result.winner;
+              challenge.looser = result.looser;
+              applyChallengeResult(challenge);
+              saveState(state);
+              renderAll();
+            }
+          });
+          event.stopPropagation();
+
       };
       tdWinner.appendChild(resultBtn);
     }

@@ -25,8 +25,8 @@ function movePlayer(fromIndex, toIndex) {
 }
 
 function applyChallengeResult(challenge) {
-  const winnerIdx = state.ranking.indexOf(challenge.winner);
-  const looserIdx = state.ranking.indexOf(challenge.looser);
+  const winnerIdx = state.ranking.indexOf(challenge.result.winner);
+  const looserIdx = state.ranking.indexOf(challenge.result.looser);
   if (winnerIdx > looserIdx) {
     movePlayer(winnerIdx, looserIdx);
   }
@@ -150,23 +150,31 @@ function renderChallenges() {
     const challenge = state.challenges[i];
     const tr = document.createElement('tr');
 
-    const status = challenge.status ?? (challenge.winner ? 'done' : 'open');
-    const date = new Date(challenge.requestDate);
+    let date = new Date(challenge.requestDate);
+    if (challenge.result) {
+      date = new Date(challenge.result.matchDate);
+    }
     const dateText = date.toLocaleString('de-DE', {
-      year: 'numeric', month: '2-digit', day: '2-digit',
-      hour: '2-digit', minute: '2-digit'
+      year: 'numeric', month: '2-digit', day: '2-digit'
     });
 
     tr.innerHTML = `
       <td data-label="Challenger">${challenge.challenger}</td>
       <td data-label="Challengee">${challenge.challengee}</td>
       <td data-label="Datum"><time datetime="${date.toISOString()}">${dateText}</time></td>
-      <td data-label="Status"><span class="badge ${status}">${status}</span></td>
     `;
     
+    const tdResult = document.createElement("td");
+    if (challenge.result) {
+      tdResult.innerHTML = `<td data-label="Result"><span class="badge done">${printableMatchResult(challenge.result)}</span></td>`
+    } else {
+      tdResult.innerHTML = `<td data-label="Result"><span class="badge open">offen</span></td>`
+    }
+    tr.appendChild(tdResult);
+
     const tdWinner = document.createElement("td");
-    if (challenge.winner) {
-      tdWinner.innerHTML = `<td data-label="Winner">${challenge.winner}</td>`
+    if (challenge.result) {
+      tdWinner.innerHTML = `<td data-label="Winner">${challenge.result.winner}</td>`
     } else {
       const resultBtn = document.createElement('button');
       resultBtn.textContent = 'Ergebnis';
@@ -175,9 +183,8 @@ function renderChallenges() {
             playerA: challenge.challenger,
             playerB: challenge.challengee,
             onSubmit: (result) => {
-              // result = { playerA:'Jannik', playerB:'Carlos', sets:[{a:6,b:4},{a:6,b:7}], tiebreak:{a:10,b:8}|null, winner, looser, createdAt }
-              challenge.winner = result.winner;
-              challenge.looser = result.looser;
+              // result = { playerA, playerB, matchDate, sets:[{a,b},{a,b},{a,b}], winner, looser }
+              challenge.result = result;
               applyChallengeResult(challenge);
               saveState(state);
               renderAll();
@@ -191,6 +198,19 @@ function renderChallenges() {
     tr.appendChild(tdWinner);
     tbody.appendChild(tr);
   }
+}
+
+function printableMatchResult(result) {
+  // result = { playerA, playerB, matchDate, sets:[{a,b},{a,b},{a,b}], winner, looser }
+  if (result && result.sets) {
+    const s1 = result.sets[0];
+    const s2 = result.sets[1];
+    const tb = result.sets.length > 2 ? result.sets[2] : null;
+    const setsPlain = [`${s1.a}:${s1.b}`, `${s2.a}:${s2.b}`];
+    if(tb) setsPlain.push(`${tb.a}:${tb.b} (MTB)`);
+    return `${setsPlain.join(', ')}`;
+  } 
+  return '';
 }
 
 
@@ -260,8 +280,7 @@ function newPlayerCard(name, rankIdx) {
         challenger: state.player,
         challengee: playBtn.dataset.player,
         requestDate: new Date(),
-        winner: null,
-        looser: null,
+        result: null,
       };
       if (confirm(`Die Forderung von Spieler "${challenge.challenger}" gegen Spieler "${challenge.challengee}" eintragen?`)) {
         state.challenges.push(challenge);

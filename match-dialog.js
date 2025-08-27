@@ -20,8 +20,12 @@
     $('#matchSummary').classList.remove('match-ok','match-err');
     $('#matchDlgSave').disabled = true;
 
+    const dateEl = $('#matchDate');
+    dateEl.valueAsDate = new Date();
+
     const modal = $('#matchModal');
-    modal.hidden = false; modal.setAttribute('aria-hidden','false');
+    modal.hidden = false; 
+    modal.setAttribute('aria-hidden','false');
 
     const onSave = () => {
       const res = collect();
@@ -131,12 +135,17 @@
             sets.push({ a: tb.a, b: tb.b });
         }
 
+        const d = document.getElementById('matchDate').value;
+        const matchDate = d && /^\d{4}-\d{2}-\d{2}$/.test(d)
+            ? d
+            : new Date().toISOString().slice(0,10);
+
         const payload = {
             playerA, playerB,
+            matchDate,
             sets, // MTB is coded as 3rd set
             winner: winner==='A' ? playerA : playerB,
             looser: winner==='B' ? playerA : playerB,
-            createdAt: new Date().toISOString()
         };
 
         return { valid:true, payload };

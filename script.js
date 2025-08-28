@@ -273,20 +273,43 @@ function newPlayerCard(player, rankIdx) {
         el.classList.remove("selected");
       });
       card.classList.add("selected");
+
+      selectedPlayer = {
+        uid: card.dataset.uid,
+        name: card.dataset.name
+      }
+      
       document.querySelectorAll(".player").forEach(el => {
         // same row left from the selected player is playable
         if (el.dataset.level == rowIdx && el.dataset.rank < colIdx) {
           el.classList.add("playable");
         }
+        
         // everyone right above selected player is playable too
         if (el.dataset.level == rowIdx - 1 && el.dataset.rank >= colIdx) {
           el.classList.add("playable");
         }
+        
+        // A player with an open challenge is not playable.
+        const challengeeHasOpenChallenge = state.challenges.some(c => 
+            (c.challengeeUid === el.dataset.uid || c.challengerUid === el.dataset.uid)
+            && c.result == null
+        );
+        if (challengeeHasOpenChallenge) {
+          el.classList.remove("playable");
+        }
+        
+        // A player is not playable if the challenger has an open challenge
+        const challengerHasOpenChallenge = state.challenges.some(c => 
+            (c.challengeeUid === selectedPlayer.uid || c.challengerUid === selectedPlayer.uid)
+            && c.result == null
+        );
+        if (challengerHasOpenChallenge) {
+          el.classList.remove("playable");
+        }
+        
       });
-      selectedPlayer = {
-        uid: card.dataset.uid,
-        name: card.dataset.name
-      }
+      
     }
     document.querySelectorAll(".playable").forEach(el => {
       el.querySelectorAll("button.challenge").forEach(btn => {

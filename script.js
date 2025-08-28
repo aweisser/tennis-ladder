@@ -26,8 +26,8 @@ function movePlayer(fromIndex, toIndex) {
 }
 
 function applyChallengeResult(challenge) {
-  const winnerIdx = state.ranking.indexOf(challenge.result.winner);
-  const looserIdx = state.ranking.indexOf(challenge.result.looser);
+  const winnerIdx = state.ranking.findIndex(p => p.name === challenge.result.winner);
+  const looserIdx = state.ranking.findIndex(p => p.name === challenge.result.looser);
   if (winnerIdx > looserIdx) {
     movePlayer(winnerIdx, looserIdx);
   }
@@ -52,23 +52,22 @@ function renderPyramid() {
   elPyramid.innerHTML = '';
   let latestRowIdx = -1;
   let level = null;
-  state.ranking.forEach((name, rankIdx) => {
+  state.ranking.forEach((player, rankIdx) => {
     const rowIdx = getPyramidRowCol(rankIdx).row;
     if (rowIdx != latestRowIdx) {
       latestRowIdx = rowIdx;
       level = newPyramidLevel(size=rowIdx+1);
       elPyramid.appendChild(level);
     }
-    const card = newPlayerCard(name, rankIdx);
+    const card = newPlayerCard(player, rankIdx);
     level.appendChild(card);
   });
 }
 
 function renderRanking() {
   elRanking.innerHTML = '';
-  state.ranking.forEach((name, rankIdx) => {
-    const pyramidRowCol = getPyramidRowCol(rankIdx);
-
+  state.ranking.forEach((player, rankIdx) => {
+    const name = player ? player.name : null;
     const card = document.createElement('div');
     card.className = 'player'
     const label = document.createElement('span');
@@ -83,7 +82,7 @@ function renderRanking() {
     up.title = "Spieler einen Platz nach vorne schieben";
     up.onclick = function (event) {
       state.ranking[rankIdx] = state.ranking[rankIdx-1];
-      state.ranking[rankIdx-1] = name;
+      state.ranking[rankIdx-1] = player;
       saveState(state);
       renderAll();
       event.stopPropagation();
@@ -95,7 +94,7 @@ function renderRanking() {
     down.title = "Spieler einen Platz nach hinten schieben";
     down.onclick = function (event) {
       state.ranking[rankIdx] = state.ranking[rankIdx+1];
-      state.ranking[rankIdx+1] = name;
+      state.ranking[rankIdx+1] = player;
       saveState(state);
       renderAll();
       event.stopPropagation();
@@ -130,8 +129,10 @@ function renderRanking() {
       add.onclick = function (event) {
         const val = prompt('Name für diesen Spieler:');
         if (val) {
-          const pname = val.trim();
-          state.ranking[rankIdx] = pname;
+          state.ranking[rankIdx] = {
+            uid: crypto.randomUUID(),
+            name: val.trim()
+          };
           saveState(state);
           renderAll();
         }
@@ -228,7 +229,8 @@ function newPyramidLevel(size) {
   return level;
 }
 
-function newPlayerCard(name, rankIdx) {
+function newPlayerCard(player, rankIdx) {
+  const name = player ? player.name : null;
   const rowIdx = getPyramidRowCol(rankIdx).row;
   const colIdx = getPyramidRowCol(rankIdx).col;
   const card = document.createElement('div');
@@ -236,6 +238,7 @@ function newPlayerCard(name, rankIdx) {
   card.dataset.level = rowIdx;
   card.dataset.rank = colIdx;
   card.dataset.name = name;
+  card.dataset.uid = player ? player.uid : null;
   const label = document.createElement('span');
   label.innerHTML = name ? `<span class="gridlabel">${rankIdx+1}. ${name}</span>` : `<span class="slot">${rankIdx+1}. [frei]</span>`;
   card.onclick = () => {
@@ -262,7 +265,10 @@ function newPlayerCard(name, rankIdx) {
           el.classList.add("playable");
         }
       });
-      selectedPlayer = card.dataset.name;
+      selectedPlayer = {
+        uid: card.dataset.uid,
+        name: card.dataset.name
+      }
     }
     document.querySelectorAll(".playable").forEach(el => {
       el.querySelectorAll("button.challenge").forEach(btn => {
@@ -274,17 +280,21 @@ function newPlayerCard(name, rankIdx) {
 
   const actions = document.createElement('div');
   actions.className = 'actions';
-  if (name) {
+  if (player) {
     const playBtn = document.createElement('button');
     playBtn.textContent = 'F';
     playBtn.title = 'Diesen Spieler fordern!';
     playBtn.className = 'challenge';
-    playBtn.dataset.player = name;
+    playBtn.dataset.player = player.name;
+    playBtn.dataset.playerUid = player.uid;
     playBtn.hidden = true;
     playBtn.onclick = function (event) {
       const challenge = {
-        challenger: selectedPlayer,
+        uid: crypto.randomUUID(),
+        challenger: selectedPlayer.name,
+        challengerUid: selectedPlayer.uid,
         challengee: playBtn.dataset.player,
+        challengeeUid: playBtn.dataset.playerUid,
         requestDate: new Date(),
         result: null,
       };
@@ -303,8 +313,10 @@ function newPlayerCard(name, rankIdx) {
     add.onclick = function (event) {
       const val = prompt('Name für diesen Spieler:');
       if (val) {
-        const pname = val.trim();
-        state.ranking[rankIdx] = pname;
+        state.ranking[rankIdx] = {
+          uid: crypto.randomUUID(),
+          name: val.trim()
+        };
         saveState(state);
         renderAll();
       }

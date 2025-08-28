@@ -159,26 +159,20 @@ function renderChallenges() {
       year: 'numeric', month: '2-digit', day: '2-digit'
     });
 
+    // Challenger, Challengee and Date
     tr.innerHTML = `
+    <td data-label="Datum"><time datetime="${date.toISOString()}">${dateText}</time></td>
       <td data-label="Challenger">${challenge.challenger}</td>
       <td data-label="Challengee">${challenge.challengee}</td>
-      <td data-label="Datum"><time datetime="${date.toISOString()}">${dateText}</time></td>
     `;
-    
+
+    // Result
     const tdResult = document.createElement("td");
     if (challenge.result) {
       tdResult.innerHTML = `<td data-label="Result"><span class="badge done">${printableMatchResult(challenge.result)}</span></td>`
     } else {
-      tdResult.innerHTML = `<td data-label="Result"><span class="badge open">offen</span></td>`
-    }
-    tr.appendChild(tdResult);
-
-    const tdWinner = document.createElement("td");
-    if (challenge.result) {
-      tdWinner.innerHTML = `<td data-label="Winner">${challenge.result.winner}</td>`
-    } else {
       const resultBtn = document.createElement('button');
-      resultBtn.textContent = 'Ergebnis';
+      resultBtn.textContent = 'Erfassen';
       resultBtn.onclick = function (event) {
           openMatchDialog({
             playerA: challenge.challenger,
@@ -194,9 +188,20 @@ function renderChallenges() {
           event.stopPropagation();
 
       };
-      tdWinner.appendChild(resultBtn);
+      tdResult.appendChild(resultBtn);
+    }
+    tr.appendChild(tdResult);
+
+     // Winner
+    const tdWinner = document.createElement("td");
+    if (challenge.result) {
+      tdWinner.innerHTML = `<td data-label="Winner">${challenge.result.winner}</td>`
+    } else {
+      tdWinner.innerHTML = `<td data-label="Result"><span class="badge open">offen</span></td>`
     }
     tr.appendChild(tdWinner);
+
+    // Append challenge
     tbody.appendChild(tr);
   }
 }

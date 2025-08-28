@@ -202,6 +202,24 @@ function renderChallenges() {
     }
     tr.appendChild(tdWinner);
 
+    // Actions
+    const tdActions = document.createElement("td");
+    const rmChallengeBtn = document.createElement('button');
+    rmChallengeBtn.textContent = '-';
+    rmChallengeBtn.onclick = function (event) {
+      if (confirm(`Spiel zwischen "${challenge.challenger}" und "${challenge.challengee}" wirklich löschen?`)) {
+        const idx = state.challenges.findIndex(c => c.uid === challenge.uid);
+        if (idx !== -1) {
+          state.challenges.splice(idx, 1);
+          saveState(state);
+          renderAll();
+        }     
+      }
+      event.stopPropagation();
+    };
+    tdActions.appendChild(rmChallengeBtn);
+    tr.appendChild(tdActions);
+
     // Append challenge
     tbody.appendChild(tr);
   }

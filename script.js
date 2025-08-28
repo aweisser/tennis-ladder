@@ -2,6 +2,7 @@ const DEFAULT_STATE = {
     ranking: [],
     challenges: [],
 };
+let selectedPlayer = null;
 const STORAGE_KEY = "tennis-ladder-v1";
 
 const elPyramid = document.getElementById('pyramid');
@@ -256,7 +257,7 @@ function newPlayerCard(name, rankIdx) {
           el.classList.add("playable");
         }
       });
-      state.player = card.dataset.name;
+      selectedPlayer = card.dataset.name;
     }
     document.querySelectorAll(".playable").forEach(el => {
       el.querySelectorAll("button.challenge").forEach(btn => {
@@ -277,7 +278,7 @@ function newPlayerCard(name, rankIdx) {
     playBtn.hidden = true;
     playBtn.onclick = function (event) {
       const challenge = {
-        challenger: state.player,
+        challenger: selectedPlayer,
         challengee: playBtn.dataset.player,
         requestDate: new Date(),
         result: null,
